@@ -804,7 +804,12 @@
                 url += '?user_id=' + encodeURIComponent(currentUser.id);
             }
             fetch(url)
-                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                    if (res.headers && res.headers.get('X-User-Deleted') === 'true') {
+                        forceLogout('Your account has been deleted or is no longer active.');
+                    }
+                    return res.json();
+                })
                 .then(function(properties) {
                     if (!Array.isArray(properties)) return;
                     for (var i = 0; i < landlordMarkers.length; i++) {
@@ -1302,7 +1307,12 @@
                     })
                     .then(function(res) {
                         return res.json().then(function(d) {
-                            if (!res.ok) throw new Error(d.error || 'Failed to create property.');
+                            if (!res.ok) {
+                                if (res.status === 401 && d.error && d.error.includes('deleted')) {
+                                    forceLogout(d.error);
+                                }
+                                throw new Error(d.error || 'Failed to create property.');
+                            }
                             return d;
                         });
                     })
@@ -1391,7 +1401,12 @@
                     })
                     .then(function(res) {
                         return res.json().then(function(d) {
-                            if (!res.ok) throw new Error(d.error || 'Failed to save property changes.');
+                            if (!res.ok) {
+                                if (res.status === 401 && d.error && d.error.includes('deleted')) {
+                                    forceLogout(d.error);
+                                }
+                                throw new Error(d.error || 'Failed to save property changes.');
+                            }
                             return d;
                         });
                     })
@@ -1794,7 +1809,57 @@
         var deleteModalOverlay = document.getElementById("delete-modal-overlay");
         var adminModalOverlay = document.getElementById("admin-modal-overlay");
 
-        // Restore user session from localStorage on page load
+        // Global Force Logout Handler
+        function forceLogout(reason) {
+            if (!currentUser && !localStorage.getItem('polisewa_user')) return;
+            currentUser = null;
+            localStorage.removeItem('polisewa_user');
+            if (authDropdown) authDropdown.classList.remove('active');
+            if (adminModalOverlay) adminModalOverlay.classList.remove('active');
+            if (deleteModalOverlay) deleteModalOverlay.classList.remove('active');
+            updateAuthButton();
+            loadProperties();
+            if (reason) {
+                setTimeout(function() {
+                    alert(reason);
+                }, 100);
+            }
+        }
+
+        // Verify user session with server
+        var isVerifyingSession = false;
+        function verifyUserSession(session) {
+            if (!session || !session.id || isVerifyingSession) return;
+            isVerifyingSession = true;
+            var verifyUrl = '/api/auth/verify?user_id=' + encodeURIComponent(session.id);
+            if (session.email) {
+                verifyUrl += '&email=' + encodeURIComponent(session.email);
+            }
+
+            fetch(verifyUrl)
+                .then(function(res) {
+                    if (res.status === 401 || res.status === 404) {
+                        forceLogout('Your account has been deleted or is no longer active.');
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (data && data.valid && data.user) {
+                        currentUser = data.user;
+                        localStorage.setItem('polisewa_user', JSON.stringify(data.user));
+                        updateAuthButton();
+                    }
+                })
+                .catch(function(err) {
+                    console.warn('Session verification error:', err);
+                })
+                .finally(function() {
+                    isVerifyingSession = false;
+                });
+        }
+
+        // Restore user session from localStorage on page load and verify with server
         var savedSession = null;
         try {
             savedSession = JSON.parse(localStorage.getItem('polisewa_user') || 'null');
@@ -1802,7 +1867,15 @@
         if (savedSession && savedSession.id) {
             currentUser = savedSession;
             updateAuthButton();
+            verifyUserSession(savedSession);
         }
+
+        // Re-verify session when user switches back to this browser window
+        window.addEventListener('focus', function () {
+            if (currentUser && currentUser.id) {
+                verifyUserSession(currentUser);
+            }
+        });
 
         authBtn.onclick = function () {
             if (currentUser) {
@@ -1904,11 +1977,7 @@
             .then(function(res) { return res.json().then(function(d) { if (!res.ok) throw new Error(d.error); return d; }); })
             .then(function(data) {
                 alert(data.message);
-                currentUser = null;
-                localStorage.removeItem('polisewa_user');
-                deleteModalOverlay.classList.remove('active');
-                updateAuthButton();
-                loadProperties();
+                forceLogout();
             })
             .catch(function(err) {
                 alert('Error: ' + err.message);
