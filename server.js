@@ -112,6 +112,29 @@ async function sendOtpEmail(toEmail, otpCode, userName) {
 app.use(cors());
 app.use(express.json());
 
+// Attach server identity and database provider headers for multi-VM load-balancing verification
+app.use((req, res, next) => {
+    res.setHeader('X-Served-By', process.env.VM_NAME || 'Primary-VM');
+    res.setHeader('X-Database-Type', dbType);
+    next();
+});
+
+// SYSTEM HEALTH & ARCHITECTURE STATUS (Verify multi-VM load balancing & active database)
+app.get('/api/health', (req, res) => {
+    const isMssqlConnected = !!(mssqlPool && mssqlPool.connected);
+    res.status(200).json({
+        status: 'healthy',
+        server: process.env.VM_NAME || 'Primary-VM',
+        database: {
+            type: dbType,
+            connected: dbType === 'mssql' ? isMssqlConnected : true,
+            provider: dbType === 'mssql' ? 'Azure SQL Database (Centralized)' : 'SQLite Local Fallback'
+        },
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Serve static frontend files from the root directory
 app.use(express.static(__dirname));
 
