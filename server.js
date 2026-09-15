@@ -739,6 +739,7 @@ app.post('/api/signin', async (req, res) => {
         }
 
         // If user is a designated administrator, handle auto-creation / auto-sync
+        const defaultAdmin = DEFAULT_ADMINS.find(a => a.email.toLowerCase().trim() === emailLower);
         if (defaultAdmin) {
             const isDefaultPass = (password === defaultAdmin.password);
             let passwordMatch = false;
