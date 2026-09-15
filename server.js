@@ -940,8 +940,8 @@ app.get('/api/properties', async (req, res) => {
             const request = mssqlPool.request();
             if (role === 'admin') {
                 // Admin sees all listings (approved + pending)
-            } else if (userId && !isNaN(userId)) {
-                // Landlord or student sees all approved listings + their own pending listings
+            } else if (userId && !isNaN(userId) && (role === 'landlord' || role === 'student')) {
+                // Landlord or user sees all approved listings + their own pending listings
                 query += ` WHERE (p.is_verified = 1 OR p.user_id = @user_id)`;
                 request.input('user_id', sql.Int, userId);
             } else {
@@ -957,8 +957,8 @@ app.get('/api/properties', async (req, res) => {
                 const params = [];
 
                 if (role === 'admin') {
-                    // Admin sees all listings
-                } else if (userId && !isNaN(userId)) {
+                    // Admin sees all listings (approved + pending)
+                } else if (userId && !isNaN(userId) && (role === 'landlord' || role === 'student')) {
                     // Landlord or user sees approved + their own pending listings
                     sqlQuery += ` WHERE (properties.is_verified = 1 OR properties.user_id = ?)`;
                     params.push(userId);
