@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 
-const { poolPromise, sql } = require('./db');
+const { poolPromise, sql, getActiveServer } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -122,13 +122,15 @@ app.use((req, res, next) => {
 // SYSTEM HEALTH & ARCHITECTURE STATUS (Verify multi-VM load balancing & active database)
 app.get('/api/health', (req, res) => {
     const isMssqlConnected = !!(mssqlPool && mssqlPool.connected);
+    const activeDbServer = getActiveServer ? getActiveServer() : (process.env.DB_SERVER || 'Unknown');
     res.status(200).json({
         status: 'healthy',
         server: process.env.VM_NAME || 'Primary-VM',
         database: {
             type: dbType,
             connected: dbType === 'mssql' ? isMssqlConnected : true,
-            provider: dbType === 'mssql' ? 'Azure SQL Database (Centralized)' : 'SQLite Local Fallback'
+            provider: dbType === 'mssql' ? `Azure SQL (${activeDbServer})` : 'SQLite Local Fallback',
+            activeServer: dbType === 'mssql' ? activeDbServer : 'localhost'
         },
         uptimeSeconds: Math.floor(process.uptime()),
         timestamp: new Date().toISOString()
@@ -176,7 +178,8 @@ async function initDatabase() {
     try {
         mssqlPool = await poolPromise;
         dbType = 'mssql';
-        console.log('✅ Pangkalan data Azure SQL bersedia (Auto-Failover Aktif).');
+        const activeServer = getActiveServer ? getActiveServer() : (process.env.DB_SERVER || 'Azure SQL');
+        console.log(`✅ Pangkalan data Azure SQL bersedia (${activeServer}) (Auto-Failover Aktif).`);
         await initMssqlTables(mssqlPool);
     } catch (err) {
         console.error('⚠️ Sambungan pangkalan data Azure SQL gagal, beralih ke SQLite tempatan:', err.message);
