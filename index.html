@@ -857,6 +857,9 @@
 
         var currentMarker = null;
         var currentUser = null;
+        try {
+            currentUser = JSON.parse(localStorage.getItem('polisewa_user') || 'null');
+        } catch(e) { currentUser = null; }
         var landlordMarkers = [];
         var editingMarkerIndex = -1;
         var pendingImages = []; // Array of { url: string, file: File | null }
@@ -1100,6 +1103,16 @@
 
                     for (var j = 0; j < properties.length; j++) {
                         var prop = properties[j];
+
+                        // Safety guard: only admins and the property owner can see unapproved/pending listings
+                        var isOwner = currentUser && currentUser.id === prop.user_id;
+                        var isAdmin = currentUser && currentUser.role === 'admin';
+                        var isVerified = prop.is_verified === 1;
+
+                        if (!isVerified && !isAdmin && !isOwner) {
+                            continue; // Never render unapproved properties belonging to other landlords
+                        }
+
                         var marker = L.marker([prop.lat, prop.lng]).addTo(map);
                         var propertyData = {
                             id: prop.id,
@@ -2157,6 +2170,13 @@
 
             // 1. Search registered rental property listings
             var matchedProperties = (landlordMarkers || []).filter(function(prop) {
+                if (!prop) return false;
+                var isOwner = currentUser && currentUser.id === prop.user_id;
+                var isAdmin = currentUser && currentUser.role === 'admin';
+                if (prop.is_verified !== 1 && !isAdmin && !isOwner) {
+                    return false;
+                }
+
                 var name = (prop.name || '').toLowerCase();
                 var desc = (prop.desc || '').toLowerCase();
                 var landlord = (prop.landlord_name || '').toLowerCase();
@@ -2443,9 +2463,14 @@
                 })
                 .then(function(data) {
                     if (data && data.valid && data.user) {
+                        var prevRole = currentUser ? currentUser.role : null;
+                        var prevId = currentUser ? currentUser.id : null;
                         currentUser = data.user;
                         localStorage.setItem('polisewa_user', JSON.stringify(data.user));
                         updateAuthButton();
+                        if (prevId !== data.user.id || prevRole !== data.user.role) {
+                            loadProperties();
+                        }
                     }
                 })
                 .catch(function(err) {
@@ -2456,15 +2481,10 @@
                 });
         }
 
-        // Restore user session from localStorage on page load and verify with server
-        var savedSession = null;
-        try {
-            savedSession = JSON.parse(localStorage.getItem('polisewa_user') || 'null');
-        } catch(e) { savedSession = null; }
-        if (savedSession && savedSession.id) {
-            currentUser = savedSession;
+        // Restore user session on page load and verify with server
+        if (currentUser && currentUser.id) {
             updateAuthButton();
-            verifyUserSession(savedSession);
+            verifyUserSession(currentUser);
         }
 
         // Re-verify session when user switches back to this browser window

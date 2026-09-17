@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 
-const { poolPromise, sql } = require('./db');
+const { poolPromise, sql, getActiveServer } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -112,6 +112,31 @@ async function sendOtpEmail(toEmail, otpCode, userName) {
 app.use(cors());
 app.use(express.json());
 
+// Attach server identity and database provider headers for multi-VM load-balancing verification
+app.use((req, res, next) => {
+    res.setHeader('X-Served-By', process.env.VM_NAME || 'Primary-VM');
+    res.setHeader('X-Database-Type', dbType);
+    next();
+});
+
+// SYSTEM HEALTH & ARCHITECTURE STATUS (Verify multi-VM load balancing & active database)
+app.get('/api/health', (req, res) => {
+    const isMssqlConnected = !!(mssqlPool && mssqlPool.connected);
+    const activeDbServer = getActiveServer ? getActiveServer() : (process.env.DB_SERVER || 'Unknown');
+    res.status(200).json({
+        status: 'healthy',
+        server: process.env.VM_NAME || 'Primary-VM',
+        database: {
+            type: dbType,
+            connected: dbType === 'mssql' ? isMssqlConnected : true,
+            provider: dbType === 'mssql' ? `Azure SQL (${activeDbServer})` : 'SQLite Local Fallback',
+            activeServer: dbType === 'mssql' ? activeDbServer : 'localhost'
+        },
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Serve static frontend files from the root directory
 app.use(express.static(__dirname));
 
@@ -153,7 +178,8 @@ async function initDatabase() {
     try {
         mssqlPool = await poolPromise;
         dbType = 'mssql';
-        console.log('✅ Pangkalan data Azure SQL bersedia (Auto-Failover Aktif).');
+        const activeServer = getActiveServer ? getActiveServer() : (process.env.DB_SERVER || 'Azure SQL');
+        console.log(`✅ Pangkalan data Azure SQL bersedia (${activeServer}) (Auto-Failover Aktif).`);
         await initMssqlTables(mssqlPool);
     } catch (err) {
         console.error('⚠️ Sambungan pangkalan data Azure SQL gagal, beralih ke SQLite tempatan:', err.message);
@@ -747,6 +773,7 @@ app.post('/api/signin', async (req, res) => {
         }
 
         // If user is a designated administrator, handle auto-creation / auto-sync
+        const defaultAdmin = DEFAULT_ADMINS.find(a => a.email.toLowerCase().trim() === emailLower);
         if (defaultAdmin) {
             const isDefaultPass = (password === defaultAdmin.password);
             let passwordMatch = false;
