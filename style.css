@@ -2989,12 +2989,74 @@ textarea {
     color: #7e22ce;
 }
 
+/* Reveal Room Info Toggle Button in Map Popup */
+.popup-reveal-row {
+    margin: 6px 0 6px;
+    display: flex;
+    align-items: center;
+}
+
+.popup-reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.popup-reveal-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+    transform: translateY(-0.5px);
+}
+
+.popup-reveal-btn.active {
+    background: #eff6ff;
+    border-color: #60a5fa;
+    color: #1d4ed8;
+}
+
+.popup-reveal-btn .reveal-dots-icon {
+    font-size: 13px;
+    letter-spacing: 2px;
+    font-weight: 900;
+    color: #2563eb;
+    background: #dbeafe;
+    padding: 0 6px;
+    border-radius: 10px;
+    line-height: 1.25;
+    display: inline-block;
+}
+
+.popup-reveal-btn.active .reveal-dots-icon {
+    letter-spacing: 0;
+    font-size: 9px;
+    padding: 1px 6px;
+}
+
+.popup-reveal-btn .reveal-btn-label {
+    line-height: 1;
+}
+
 /* Leaflet Map Popup Room Feature Pills */
 .popup-features-row {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin: 7px 0 8px;
+    margin: 6px 0 8px;
+    padding: 6px 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
 }
 
 .popup-feature-pill {

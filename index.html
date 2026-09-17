@@ -28,7 +28,7 @@
     <script src="boundary.js"></script>
 
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=20260917_3" />
+    <link rel="stylesheet" href="style.css?v=20260917_4" />
 </head>
 
 <body>
@@ -1144,11 +1144,16 @@
                                 }
                                 map.panTo(e.latlng, { animate: true });
                                 m.openPopup();
-
-                                var item = landlordMarkers[idx];
-                                var isOwner = currentUser && item && currentUser.id === item.user_id;
-                                if (!isOwner) {
-                                    openPropertyPanel('view', idx);
+                            });
+                            m.on('popupclose', function() {
+                                var row = document.getElementById('popup-features-' + idx);
+                                if (row) {
+                                    row.style.display = 'none';
+                                    var btn = row.previousElementSibling ? row.previousElementSibling.querySelector('.popup-reveal-btn') : null;
+                                    if (btn) {
+                                        btn.classList.remove('active');
+                                        btn.innerHTML = "<span class='reveal-dots-icon'>••••</span> <span class='reveal-btn-label'>Reveal Room Info</span>";
+                                    }
                                 }
                             });
                         })(marker, index);
@@ -1188,6 +1193,35 @@
             }
             return null;
         }
+
+        window.togglePopupFeatures = function(index, btn, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            var featuresRow = document.getElementById('popup-features-' + index);
+            if (!featuresRow) return;
+
+            var isHidden = featuresRow.style.display === 'none' || featuresRow.style.display === '';
+            if (isHidden) {
+                featuresRow.style.display = 'flex';
+                if (btn) {
+                    btn.classList.add('active');
+                    btn.innerHTML = "<span class='reveal-dots-icon' style='letter-spacing:0;'>▲</span> <span class='reveal-btn-label'>Hide Room Info</span>";
+                }
+            } else {
+                featuresRow.style.display = 'none';
+                if (btn) {
+                    btn.classList.remove('active');
+                    btn.innerHTML = "<span class='reveal-dots-icon'>••••</span> <span class='reveal-btn-label'>Reveal Room Info</span>";
+                }
+            }
+
+            var item = landlordMarkers[index];
+            if (item && item.marker && item.marker.getPopup()) {
+                item.marker.getPopup().update();
+            }
+        };
 
         function createMarkerPopup(index) {
             var data = landlordMarkers[index];
@@ -1291,7 +1325,15 @@
                     }
                 }
                 if (pills.length > 0) {
-                    detailsBadgesHtml = "<div class='popup-features-row'>" + pills.join('') + "</div>";
+                    detailsBadgesHtml = 
+                        "<div class='popup-reveal-row'>" +
+                            "<button type='button' class='popup-reveal-btn' onclick='togglePopupFeatures(" + index + ", this, event)' title='Click .... to reveal room information'>" +
+                                "<span class='reveal-dots-icon'>••••</span> <span class='reveal-btn-label'>Reveal Room Info</span>" +
+                            "</button>" +
+                        "</div>" +
+                        "<div class='popup-features-row' id='popup-features-" + index + "' style='display:none;'>" +
+                            pills.join('') +
+                        "</div>";
                 }
             }
 
@@ -2319,10 +2361,6 @@
                         setTimeout(function() {
                             if (prop.marker) {
                                 prop.marker.openPopup();
-                            }
-                            var propIdx = landlordMarkers.indexOf(prop);
-                            if (propIdx !== -1) {
-                                openPropertyPanel('view', propIdx);
                             }
                         }, 450);
                     };
