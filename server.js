@@ -345,6 +345,11 @@ async function initMssqlTables(pool) {
             AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('properties') AND name = 'is_verified')
             ALTER TABLE properties ADD is_verified INT DEFAULT 0;
         `);
+        await pool.request().query(`
+            IF EXISTS (SELECT * FROM sysobjects WHERE name='properties' AND xtype='U')
+            AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('properties') AND name = 'details')
+            ALTER TABLE properties ADD details NVARCHAR(MAX);
+        `);
         console.log('Azure SQL tables verified and initialized successfully.');
         await seedAdminAccounts();
     } catch (err) {
@@ -440,6 +445,9 @@ function initSqliteTables() {
                         }
                         if (!colNames.includes('is_verified')) {
                             sqliteDb.run(`ALTER TABLE properties ADD COLUMN is_verified INTEGER DEFAULT 0`, () => { });
+                        }
+                        if (!colNames.includes('details')) {
+                            sqliteDb.run(`ALTER TABLE properties ADD COLUMN details TEXT DEFAULT ''`, () => { });
                         }
                     }
                 });
@@ -930,6 +938,7 @@ app.get('/api/properties', async (req, res) => {
                     p.lat, 
                     p.lng, 
                     p.image,
+                    p.details,
                     ISNULL(p.is_verified, 0) AS is_verified,
                     u.name AS landlord_name,
                     u.role AS landlord_role
@@ -938,10 +947,10 @@ app.get('/api/properties', async (req, res) => {
             `;
 
             const request = mssqlPool.request();
-            if (role === 'admin') {
-                // Admin sees all listings (approved + pending)
+            if (role === 'admin' || role === 'student') {
+                // Admin and Students see all listings created by landlords
             } else if (userId && !isNaN(userId)) {
-                // Landlord or student sees all approved listings + their own pending listings
+                // Landlords see all approved listings + their own pending listings
                 query += ` WHERE (p.is_verified = 1 OR p.user_id = @user_id)`;
                 request.input('user_id', sql.Int, userId);
             } else {
@@ -956,10 +965,10 @@ app.get('/api/properties', async (req, res) => {
                 let sqlQuery = `SELECT properties.*, users.name as landlord_name, users.role as landlord_role FROM properties JOIN users ON properties.user_id = users.id`;
                 const params = [];
 
-                if (role === 'admin') {
-                    // Admin sees all listings
+                if (role === 'admin' || role === 'student') {
+                    // Admin and Students see all properties created by landlords
                 } else if (userId && !isNaN(userId)) {
-                    // Landlord or user sees approved + their own pending listings
+                    // Landlords see approved + their own pending listings
                     sqlQuery += ` WHERE (properties.is_verified = 1 OR properties.user_id = ?)`;
                     params.push(userId);
                 } else {
@@ -1011,11 +1020,12 @@ function hasValidPhotos(image) {
 
 // CREATE PROPERTY (Max 2 per landlord, unlimited for admin)
 app.post('/api/properties', async (req, res) => {
-    const { user_id, name, desc, price, phone, lat, lng, image } = req.body;
+    const { user_id, name, desc, price, phone, lat, lng, image, details } = req.body;
     const trimmedName = name ? String(name).trim() : '';
     const trimmedDesc = desc ? String(desc).trim() : '';
     const trimmedPrice = price ? String(price).trim() : '';
     const trimmedPhone = phone ? String(phone).trim() : '';
+    const detailsStr = typeof details === 'object' ? JSON.stringify(details) : (details ? String(details) : '');
 
     if (!user_id || !trimmedName || !trimmedDesc || !trimmedPrice || !trimmedPhone || !hasValidPhotos(image) || lat === undefined || lng === undefined) {
         return res.status(400).json({ error: 'All fields (Property Name, Description, Monthly Rent, Contact Phone Number, and at least 1 Photo) are mandatory.' });
@@ -1050,11 +1060,12 @@ app.post('/api/properties', async (req, res) => {
                 .input('lat', sql.Float, lat)
                 .input('lng', sql.Float, lng)
                 .input('image', sql.NVarChar, image || '')
+                .input('details', sql.NVarChar, detailsStr)
                 .input('is_verified', sql.Int, initialVerified)
                 .query(`
-                    INSERT INTO properties (user_id, name, [desc], price, phone, lat, lng, image, is_verified)
+                    INSERT INTO properties (user_id, name, [desc], price, phone, lat, lng, image, details, is_verified)
                     OUTPUT INSERTED.id
-                    VALUES (@user_id, @name, @desc, @price, @phone, @lat, @lng, @image, @is_verified)
+                    VALUES (@user_id, @name, @desc, @price, @phone, @lat, @lng, @image, @details, @is_verified)
                 `);
 
             res.status(201).json({
@@ -1072,8 +1083,8 @@ app.post('/api/properties', async (req, res) => {
                 const initialVerified = isAdmin ? 1 : 0;
 
                 const insertProperty = () => {
-                    const sqlQuery = `INSERT INTO properties (user_id, name, desc, price, phone, lat, lng, image, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-                    sqliteDb.run(sqlQuery, [user_id, trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, lat, lng, image || '', initialVerified], function (err2) {
+                    const sqlQuery = `INSERT INTO properties (user_id, name, desc, price, phone, lat, lng, image, details, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                    sqliteDb.run(sqlQuery, [user_id, trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, lat, lng, image || '', detailsStr, initialVerified], function (err2) {
                         if (err2) return res.status(500).json({ error: 'Database error: ' + err2.message });
                         res.status(201).json({
                             id: this.lastID,
@@ -1107,11 +1118,12 @@ app.post('/api/properties', async (req, res) => {
 // UPDATE PROPERTY (Owner or Admin)
 app.put('/api/properties/:id', async (req, res) => {
     const { id } = req.params;
-    const { user_id, name, desc, price, phone, image } = req.body;
+    const { user_id, name, desc, price, phone, image, details } = req.body;
     const trimmedName = name ? String(name).trim() : '';
     const trimmedDesc = desc ? String(desc).trim() : '';
     const trimmedPrice = price ? String(price).trim() : '';
     const trimmedPhone = phone ? String(phone).trim() : '';
+    const detailsStr = typeof details === 'object' ? JSON.stringify(details) : (details ? String(details) : '');
 
     if (!user_id || !trimmedName || !trimmedDesc || !trimmedPrice || !trimmedPhone || !hasValidPhotos(image)) {
         return res.status(400).json({ error: 'All fields (Property Name, Description, Monthly Rent, Contact Phone Number, and at least 1 Photo) are mandatory.' });
@@ -1125,8 +1137,8 @@ app.put('/api/properties/:id', async (req, res) => {
             const isAdmin = userRes.recordset.length > 0 && userRes.recordset[0].role === 'admin';
 
             const query = isAdmin
-                ? `UPDATE properties SET name = @name, [desc] = @desc, price = @price, phone = @phone, image = @image WHERE id = @id`
-                : `UPDATE properties SET name = @name, [desc] = @desc, price = @price, phone = @phone, image = @image WHERE id = @id AND user_id = @user_id`;
+                ? `UPDATE properties SET name = @name, [desc] = @desc, price = @price, phone = @phone, image = @image, details = @details WHERE id = @id`
+                : `UPDATE properties SET name = @name, [desc] = @desc, price = @price, phone = @phone, image = @image, details = @details WHERE id = @id AND user_id = @user_id`;
 
             const reqObj = mssqlPool.request()
                 .input('id', sql.Int, id)
@@ -1134,7 +1146,8 @@ app.put('/api/properties/:id', async (req, res) => {
                 .input('desc', sql.NVarChar, trimmedDesc)
                 .input('price', sql.NVarChar, trimmedPrice)
                 .input('phone', sql.NVarChar, trimmedPhone)
-                .input('image', sql.NVarChar, image || '');
+                .input('image', sql.NVarChar, image || '')
+                .input('details', sql.NVarChar, detailsStr);
             if (!isAdmin) reqObj.input('user_id', sql.Int, user_id);
 
             const result = await reqObj.query(query);
@@ -1148,11 +1161,11 @@ app.put('/api/properties/:id', async (req, res) => {
                 const isAdmin = userRow && userRow.role === 'admin';
 
                 const sqlQuery = isAdmin
-                    ? `UPDATE properties SET name = ?, desc = ?, price = ?, phone = ?, image = ? WHERE id = ?`
-                    : `UPDATE properties SET name = ?, desc = ?, price = ?, phone = ?, image = ? WHERE id = ? AND user_id = ?`;
+                    ? `UPDATE properties SET name = ?, desc = ?, price = ?, phone = ?, image = ?, details = ? WHERE id = ?`
+                    : `UPDATE properties SET name = ?, desc = ?, price = ?, phone = ?, image = ?, details = ? WHERE id = ? AND user_id = ?`;
                 const params = isAdmin
-                    ? [trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, image || '', id]
-                    : [trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, image || '', id, user_id];
+                    ? [trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, image || '', detailsStr, id]
+                    : [trimmedName, trimmedDesc, trimmedPrice, trimmedPhone, image || '', detailsStr, id, user_id];
 
                 sqliteDb.run(sqlQuery, params, function (err) {
                     if (err) return res.status(500).json({ error: 'Database error: ' + err.message });

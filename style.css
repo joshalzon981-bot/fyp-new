@@ -2757,3 +2757,386 @@ textarea {
     }
 }
 
+/* ==========================================================================
+   PROPERTY ROOM SPECIFICATIONS & ACCORDIONS (FLOOR, ROOM, BATHROOM, UTILITIES, PREFERENCES)
+   ========================================================================== */
+
+.room-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.accordion-section {
+    border-radius: 12px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 2px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.accordion-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.2px;
+}
+
+.accordion-chevron {
+    color: #475569;
+    transition: transform 0.25s ease;
+}
+
+.accordion-section.collapsed .accordion-chevron {
+    transform: rotate(180deg);
+}
+
+.accordion-body {
+    padding: 8px 0 4px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+}
+
+.accordion-section.collapsed .accordion-body {
+    display: none;
+}
+
+.section-divider {
+    height: 1px;
+    background: #e2e8f0;
+    width: 100%;
+    margin: 4px 0;
+}
+
+.subgroup-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+/* Custom Checkbox & Radio Lists */
+.checkbox-list,
+.radio-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+.custom-checkbox-item,
+.custom-radio-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #334155;
+    font-weight: 400;
+    user-select: none;
+    transition: color 0.15s ease;
+    line-height: 1.35;
+    padding: 2px 0;
+    min-width: 0;
+}
+
+.custom-checkbox-item:hover,
+.custom-radio-item:hover {
+    color: #0f172a;
+}
+
+.custom-checkbox-item input,
+.custom-radio-item input {
+    display: none;
+}
+
+.checkbox-label,
+.radio-label {
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+/* Custom Checkbox Box */
+.checkbox-box {
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    margin-top: 1.5px;
+}
+
+.custom-checkbox-item input:checked + .checkbox-box {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.custom-checkbox-item input:checked + .checkbox-box::after {
+    content: '';
+    width: 4px;
+    height: 8.5px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+    display: block;
+}
+
+/* Custom Radio Circle */
+.radio-circle {
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    margin-top: 1.5px;
+}
+
+.custom-radio-item input:checked + .radio-circle {
+    border-color: #2563eb;
+}
+
+.custom-radio-item input:checked + .radio-circle::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2563eb;
+    display: block;
+}
+
+/* View Mode Room Details Card */
+.room-details-view-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.detail-view-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-view-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-badges-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.detail-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.detail-badge-pill.pill-primary {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+
+.detail-badge-pill.pill-success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #047857;
+}
+
+.detail-badge-pill.pill-purple {
+    background: #faf5ff;
+    border-color: #e9d5ff;
+    color: #7e22ce;
+}
+
+/* Leaflet Map Popup Room Feature Pills */
+.popup-features-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 7px 0 8px;
+}
+
+.popup-feature-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+    line-height: 1.3;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+.popup-feature-pill.pill-room {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.popup-feature-pill.pill-bath {
+    background: #ecfeff;
+    color: #0e7490;
+    border-color: #a5f3fc;
+}
+
+.popup-feature-pill.pill-util {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+
+.popup-feature-pill.pill-pref {
+    background: #faf5ff;
+    color: #7e22ce;
+    border-color: #e9d5ff;
+}
+
+/* Student Room Details Showcase View in Slide-over Panel */
+.panel-view-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.panel-edit-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.panel-showcase-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.panel-showcase-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.panel-showcase-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+}
+
+.panel-showcase-price-banner {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.panel-showcase-price-amount {
+    font-size: 22px;
+    font-weight: 800;
+    color: #2563eb;
+    letter-spacing: -0.5px;
+}
+
+.panel-showcase-price-period {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.panel-showcase-desc-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #334155;
+    white-space: pre-line;
+}
+
+.panel-showcase-desc-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+/* Search Results Room Features Preview */
+.result-features-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.result-feature-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+
+

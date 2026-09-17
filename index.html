@@ -409,38 +409,317 @@
         </div>
 
         <form id="property-panel-form" onsubmit="savePropertyFromPanel(event)">
-            <div class="input-group">
-                <label for="panel-name">Property / Room Name <span class="required-star">*</span></label>
-                <input type="text" id="panel-name" required placeholder="Cozy Room near PKS" />
-            </div>
-            <div class="input-group">
-                <label for="panel-desc">Description <span class="required-star">*</span></label>
-                <textarea id="panel-desc" rows="3" required placeholder="Single room, fully furnished, WiFi included"></textarea>
-            </div>
-            <div class="input-group">
-                <label for="panel-price">Monthly Rent (RM) <span class="required-star">*</span></label>
-                <input type="number" id="panel-price" required placeholder="350" min="1" step="any" inputmode="numeric" />
-            </div>
-            <div class="input-group">
-                <label for="panel-phone">Contact Phone Number <span class="required-star">*</span></label>
-                <input type="tel" id="panel-phone" required placeholder="+60123456789" inputmode="tel" pattern="[0-9+]+" oninput="this.value = this.value.replace(/[^0-9+]/g, '')" />
-            </div>
-            <div class="input-group" id="panel-image-group">
-                <label id="panel-image-label">Property Photos (0 / 10) <span class="required-star">*</span></label>
-                <!-- Multi-file input for Landlord Uploads -->
-                <input type="file" id="panel-image-input" accept="image/*" multiple hidden onchange="handleImageSelection(event)" />
-                
-                <!-- Landlord Multiple Image Container Grid (Edit/Create mode) -->
-                <div id="panel-image-edit-container" style="display:none; width: 100%;">
-                    <div class="panel-image-grid" id="panel-image-grid"></div>
-                </div>
-
+            <!-- Student/Viewer Mode Room Showcase Section -->
+            <div id="panel-view-section" class="panel-view-section" style="display:none;">
                 <!-- User/Student Photo Gallery Viewer (View mode) -->
-                <div id="panel-image-view-container" style="display:none; width: 100%;">
+                <div id="panel-image-view-container" style="width: 100%;">
                     <div id="panel-gallery-view"></div>
                 </div>
+
+                <!-- Showcase Property & Pricing Overview Card -->
+                <div class="panel-showcase-card">
+                    <div class="panel-showcase-title-row">
+                        <div class="panel-showcase-title" id="showcase-title">Room Name</div>
+                        <div id="showcase-badge"></div>
+                    </div>
+                    <div class="panel-showcase-price-banner">
+                        <span class="panel-showcase-price-amount" id="showcase-price">RM 0</span>
+                        <span class="panel-showcase-price-period">/ month</span>
+                    </div>
+                    <div class="panel-showcase-desc-box">
+                        <div class="panel-showcase-desc-title">Description</div>
+                        <div id="showcase-desc">Room description goes here...</div>
+                    </div>
+                </div>
+
+                <!-- Student/Guest Room Details View Display Container (Specifications & Utilities) -->
+                <div id="panel-room-details-view" class="room-details-view-container"></div>
+
+                <!-- Landlord Contact Information Card -->
+                <div id="panel-landlord-info" class="panel-landlord-info"></div>
             </div>
-            <div id="panel-landlord-info" class="panel-landlord-info"></div>
+
+            <!-- Landlord Create / Edit Mode Form Section -->
+            <div id="panel-edit-section" class="panel-edit-section">
+                <div class="input-group">
+                    <label for="panel-name">Property / Room Name <span class="required-star">*</span></label>
+                    <input type="text" id="panel-name" placeholder="Cozy Room near PKS" />
+                </div>
+                <div class="input-group">
+                    <label for="panel-desc">Description <span class="required-star">*</span></label>
+                    <textarea id="panel-desc" rows="3" placeholder="Single room, fully furnished, WiFi included"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="panel-price">Monthly Rent (RM) <span class="required-star">*</span></label>
+                    <input type="number" id="panel-price" placeholder="350" min="1" step="any" inputmode="numeric" />
+                </div>
+                <div class="input-group">
+                    <label for="panel-phone">Contact Phone Number <span class="required-star">*</span></label>
+                    <input type="tel" id="panel-phone" placeholder="+60123456789" inputmode="tel" pattern="[0-9+]+" oninput="this.value = this.value.replace(/[^0-9+]/g, '')" />
+                </div>
+                <div class="input-group" id="panel-image-group">
+                    <label id="panel-image-label">Property Photos (0 / 10) <span class="required-star">*</span></label>
+                    <!-- Multi-file input for Landlord Uploads -->
+                    <input type="file" id="panel-image-input" accept="image/*" multiple hidden onchange="handleImageSelection(event)" />
+                    
+                    <!-- Landlord Multiple Image Container Grid (Edit/Create mode) -->
+                    <div id="panel-image-edit-container" style="display:none; width: 100%;">
+                        <div class="panel-image-grid" id="panel-image-grid"></div>
+                    </div>
+                </div>
+
+            <!-- Room Specification Sections (Landlord Input / Viewer Display) -->
+            <div id="panel-room-details-edit" class="room-details-container">
+                
+                <!-- 1. Floor Level -->
+                <div class="accordion-section" id="acc-floor-level">
+                    <div class="accordion-header" onclick="toggleAccordion('acc-floor-level')">
+                        <span class="accordion-title">Floor Level</span>
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="checkbox-list">
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_floor_level" value="Ground">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Ground</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_floor_level" value="Low">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Low</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_floor_level" value="Mid">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Mid</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_floor_level" value="High">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">High</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_floor_level" value="Penthouse">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Penthouse</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- 2. Room Type -->
+                <div class="accordion-section" id="acc-room-type">
+                    <div class="accordion-header" onclick="toggleAccordion('acc-room-type')">
+                        <span class="accordion-title">Room Type</span>
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="radio-list">
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Master">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Master</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Guest">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Guest</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Middle">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Middle</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Studio">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Studio</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Single">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Single</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_room_type" value="Suite">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Suite</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- 3. Bathroom Type -->
+                <div class="accordion-section" id="acc-bathroom-type">
+                    <div class="accordion-header" onclick="toggleAccordion('acc-bathroom-type')">
+                        <span class="accordion-title">Bathroom Type</span>
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="radio-list">
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_bathroom_type" value="Private">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Private</span>
+                            </label>
+                            <label class="custom-radio-item">
+                                <input type="radio" name="prop_bathroom_type" value="Shared">
+                                <span class="radio-circle"></span>
+                                <span class="radio-label">Shared</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- 4. Utilities -->
+                <div class="accordion-section" id="acc-utilities">
+                    <div class="accordion-header" onclick="toggleAccordion('acc-utilities')">
+                        <span class="accordion-title">Utilities</span>
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="subgroup-title">GENERAL</div>
+                        <div class="checkbox-list">
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Air-Conditioning">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Air-Conditioning</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Washing Machine">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Washing Machine</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Wifi / Internet Access">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Wifi / Internet Access</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Cooking Allowed">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Cooking Allowed</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="TV">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">TV</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Share Bathroom">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Share Bathroom</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Private Bathroom">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Private Bathroom</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_utilities" value="Shower">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Shower</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- 5. Preferences -->
+                <div class="accordion-section" id="acc-preferences">
+                    <div class="accordion-header" onclick="toggleAccordion('acc-preferences')">
+                        <span class="accordion-title">Preferences</span>
+                        <svg class="accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="subgroup-title">GENERAL</div>
+                        <div class="checkbox-list">
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Preferred Listing">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Preferred Listing</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Prefer Zero Deposit">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Prefer Zero Deposit</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Prefer move-in immediately">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Prefer move-in immediately</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Prefer pet allowed">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Prefer pet allowed</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Prefer muslim friendly">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Prefer muslim friendly</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_general" value="Prefer smoking allowed">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Prefer smoking allowed</span>
+                            </label>
+                        </div>
+
+                        <div class="subgroup-title" style="margin-top:16px;">RACE</div>
+                        <div class="checkbox-list">
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_race" value="Other">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Other</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_race" value="Indian">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Indian</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_race" value="Chinese">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Chinese</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_race" value="Malay">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Malay</span>
+                            </label>
+                        </div>
+
+                        <div class="subgroup-title" style="margin-top:16px;">OCCUPATION</div>
+                        <div class="checkbox-list">
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_occupation" value="Unemployed">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Unemployed</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_occupation" value="Employed">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Employed</span>
+                            </label>
+                            <label class="custom-checkbox-item">
+                                <input type="checkbox" name="prop_pref_occupation" value="Student">
+                                <span class="checkbox-box"></span>
+                                <span class="checkbox-label">Student</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
             <div class="panel-actions" id="panel-actions-edit">
                 <button type="button" class="panel-btn-secondary" id="panel-delete-btn" onclick="deletePropertyFromPanel()" style="display:none; background:#fee2e2; color:#ef4444; border:1px solid #fca5a5;">Delete Pinpoint</button>
                 <button type="button" class="panel-btn-secondary" id="panel-cancel-btn" onclick="closePropertyPanel()">Cancel</button>
@@ -834,7 +1113,8 @@
                             is_verified: prop.is_verified || 0,
                             lat: prop.lat,
                             lng: prop.lng,
-                            image: prop.image || ''
+                            image: prop.image || '',
+                            details: prop.details || ''
                         };
                         var index = landlordMarkers.length;
                         landlordMarkers.push(propertyData);
@@ -851,6 +1131,12 @@
                                 }
                                 map.panTo(e.latlng, { animate: true });
                                 m.openPopup();
+
+                                var item = landlordMarkers[idx];
+                                var isOwner = currentUser && item && currentUser.id === item.user_id;
+                                if (!isOwner) {
+                                    openPropertyPanel('view', idx);
+                                }
                             });
                         })(marker, index);
                     }
@@ -873,6 +1159,21 @@
                     item.marker.bindPopup(newContent);
                 }
             }
+        }
+
+        function parsePropertyDetails(details) {
+            if (!details) return null;
+            if (typeof details === 'object') return details;
+            if (typeof details === 'string') {
+                var trimmed = details.trim();
+                if (!trimmed || trimmed === '""' || trimmed === '{}') return null;
+                try {
+                    return JSON.parse(trimmed);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return null;
         }
 
         function createMarkerPopup(index) {
@@ -934,13 +1235,61 @@
             var imageUrls = parseImageUrls(data.image);
             var imageHtml = buildGalleryHtml(imageUrls, 'popup-gallery-' + index, true);
 
+            var detailsObj = parsePropertyDetails(data.details);
+            var detailsBadgesHtml = '';
+            if (detailsObj) {
+                var pills = [];
+                if (detailsObj.room_type) {
+                    pills.push("<span class='popup-feature-pill pill-room'>🛏️ " + escapeHtml(detailsObj.room_type) + "</span>");
+                }
+                if (detailsObj.bathroom_type) {
+                    pills.push("<span class='popup-feature-pill pill-bath'>🚿 " + escapeHtml(detailsObj.bathroom_type) + " Bath</span>");
+                }
+                if (detailsObj.floor_level && Array.isArray(detailsObj.floor_level) && detailsObj.floor_level.length > 0) {
+                    pills.push("<span class='popup-feature-pill'>🏢 " + escapeHtml(detailsObj.floor_level.join('/')) + " Flr</span>");
+                }
+                if (detailsObj.utilities && Array.isArray(detailsObj.utilities) && detailsObj.utilities.length > 0) {
+                    var maxUtils = 3;
+                    for (var u = 0; u < Math.min(detailsObj.utilities.length, maxUtils); u++) {
+                        var uName = detailsObj.utilities[u];
+                        var shortU = uName.replace(' / Internet Access', '').replace('Air-Conditioning', 'Air-Con');
+                        var uIcon = (uName.indexOf('Air') !== -1 ? '❄️ ' : (uName.indexOf('Wifi') !== -1 ? '📶 ' : (uName.indexOf('Wash') !== -1 ? '🧺 ' : '✓ ')));
+                        pills.push("<span class='popup-feature-pill pill-util'>" + uIcon + escapeHtml(shortU) + "</span>");
+                    }
+                    if (detailsObj.utilities.length > maxUtils) {
+                        pills.push("<span class='popup-feature-pill pill-util'>+" + (detailsObj.utilities.length - maxUtils) + " more</span>");
+                    }
+                }
+                if (detailsObj.preferences && detailsObj.preferences.general && Array.isArray(detailsObj.preferences.general) && detailsObj.preferences.general.length > 0) {
+                    for (var g = 0; g < Math.min(detailsObj.preferences.general.length, 3); g++) {
+                        var genPref = detailsObj.preferences.general[g].replace('Prefer ', '').replace('Preferred ', '');
+                        var prefIcon = (genPref.indexOf('Deposit') !== -1 ? '💰 ' : (genPref.indexOf('move-in') !== -1 ? '🚀 ' : (genPref.indexOf('pet') !== -1 ? '🐾 ' : (genPref.indexOf('muslim') !== -1 ? '🕌 ' : '⭐ '))));
+                        pills.push("<span class='popup-feature-pill pill-pref'>" + prefIcon + escapeHtml(genPref) + "</span>");
+                    }
+                }
+                if (detailsObj.preferences && detailsObj.preferences.race && Array.isArray(detailsObj.preferences.race) && detailsObj.preferences.race.length > 0) {
+                    for (var r = 0; r < Math.min(detailsObj.preferences.race.length, 2); r++) {
+                        pills.push("<span class='popup-feature-pill pill-pref'>👤 " + escapeHtml(detailsObj.preferences.race[r]) + "</span>");
+                    }
+                }
+                if (detailsObj.preferences && detailsObj.preferences.occupation && Array.isArray(detailsObj.preferences.occupation) && detailsObj.preferences.occupation.length > 0) {
+                    for (var o = 0; o < Math.min(detailsObj.preferences.occupation.length, 2); o++) {
+                        pills.push("<span class='popup-feature-pill pill-pref'>💼 " + escapeHtml(detailsObj.preferences.occupation[o]) + "</span>");
+                    }
+                }
+                if (pills.length > 0) {
+                    detailsBadgesHtml = "<div class='popup-features-row'>" + pills.join('') + "</div>";
+                }
+            }
+
             popupContent.innerHTML = imageHtml +
                 "<div class='popup-title-row'>" +
                     "<span class='popup-prop-name'>" + escapeHtml(data.name || 'Property') + "</span>" +
                     verifiedBadgeHtml +
                 "</div>" +
                 (data.desc ? "<div style='font-size:12px;color:#64748b;margin-bottom:6px;line-height:1.4;'>" + escapeHtml(data.desc) + "</div>" : "") +
-                (data.price ? "<div style='color:#2563eb;font-weight:700;font-size:15px;margin-bottom:8px;'>RM " + escapeHtml(data.price) + "<span style='font-size:11px;font-weight:400;color:#64748b;'> /month</span></div>" : "") +
+                (data.price ? "<div style='color:#2563eb;font-weight:700;font-size:15px;margin-bottom:6px;'>RM " + escapeHtml(data.price) + "<span style='font-size:11px;font-weight:400;color:#64748b;'> /month</span></div>" : "") +
+                detailsBadgesHtml +
                 (data.phone ? buildContactButtonsHtml(data.phone) : "") +
                 actionsHtml;
 
@@ -1114,6 +1463,202 @@
             }
         }
 
+        function toggleAccordion(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('collapsed');
+            }
+        }
+
+        function collectPropertyDetailsFromPanel() {
+            var getCheckedValues = function(name) {
+                var checked = [];
+                var inputs = document.querySelectorAll('input[name="' + name + '"]:checked');
+                for (var i = 0; i < inputs.length; i++) {
+                    checked.push(inputs[i].value);
+                }
+                return checked;
+            };
+
+            var getRadioValue = function(name) {
+                var checked = document.querySelector('input[name="' + name + '"]:checked');
+                return checked ? checked.value : '';
+            };
+
+            return {
+                floor_level: getCheckedValues('prop_floor_level'),
+                room_type: getRadioValue('prop_room_type'),
+                bathroom_type: getRadioValue('prop_bathroom_type'),
+                utilities: getCheckedValues('prop_utilities'),
+                preferences: {
+                    general: getCheckedValues('prop_pref_general'),
+                    race: getCheckedValues('prop_pref_race'),
+                    occupation: getCheckedValues('prop_pref_occupation')
+                }
+            };
+        }
+
+        function resetPropertyDetailsForm() {
+            var names = ['prop_floor_level', 'prop_room_type', 'prop_bathroom_type', 'prop_utilities', 'prop_pref_general', 'prop_pref_race', 'prop_pref_occupation'];
+            for (var i = 0; i < names.length; i++) {
+                var inputs = document.querySelectorAll('input[name="' + names[i] + '"]');
+                for (var j = 0; j < inputs.length; j++) {
+                    inputs[j].checked = false;
+                }
+            }
+        }
+
+        function populatePropertyDetailsForm(details) {
+            resetPropertyDetailsForm();
+            var data = parsePropertyDetails(details);
+            if (!data || typeof data !== 'object') return;
+
+            var setChecked = function(name, values) {
+                if (!values || !Array.isArray(values)) return;
+                var inputs = document.querySelectorAll('input[name="' + name + '"]');
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].checked = (values.indexOf(inputs[i].value) !== -1);
+                }
+            };
+
+            var setRadio = function(name, val) {
+                if (!val) return;
+                var inputs = document.querySelectorAll('input[name="' + name + '"]');
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].checked = (inputs[i].value === val);
+                }
+            };
+
+            setChecked('prop_floor_level', data.floor_level);
+            setRadio('prop_room_type', data.room_type);
+            setRadio('prop_bathroom_type', data.bathroom_type);
+            setChecked('prop_utilities', data.utilities);
+
+            if (data.preferences) {
+                setChecked('prop_pref_general', data.preferences.general);
+                setChecked('prop_pref_race', data.preferences.race);
+                setChecked('prop_pref_occupation', data.preferences.occupation);
+            }
+        }
+
+        function renderPropertyDetailsView(details) {
+            var container = document.getElementById('panel-room-details-view');
+            if (!container) return;
+            container.innerHTML = '';
+
+            var data = parsePropertyDetails(details);
+            if (!data || typeof data !== 'object') {
+                container.innerHTML = '<div class="detail-view-card" style="background:#f8fafc; border:1px dashed #cbd5e1; text-align:center; padding:16px 14px;">' +
+                    '<div style="font-size:22px; margin-bottom:4px;">🛏️</div>' +
+                    '<div style="font-weight:700; color:#334155; font-size:13.5px;">Standard Room Rental</div>' +
+                    '<div style="font-size:12px; color:#64748b; margin-top:2px;">Contact landlord directly via phone or WhatsApp for specific room amenities & details.</div>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '';
+
+            // 1. Room Specifications (Room Type, Bathroom Type, Floor Level)
+            var hasRoomSpecs = (data.floor_level && data.floor_level.length > 0) || data.room_type || data.bathroom_type;
+            if (hasRoomSpecs) {
+                html += '<div class="detail-view-card">' +
+                    '<div class="detail-view-card-title">🏢 Room Specifications</div>' +
+                    '<div class="detail-badges-grid">';
+                if (data.room_type) {
+                    html += '<span class="detail-badge-pill pill-primary">🛏️ ' + escapeHtml(data.room_type) + ' Room</span>';
+                }
+                if (data.bathroom_type) {
+                    html += '<span class="detail-badge-pill pill-primary">🚿 ' + escapeHtml(data.bathroom_type) + ' Bathroom</span>';
+                }
+                if (data.floor_level && data.floor_level.length > 0) {
+                    var fls = Array.isArray(data.floor_level) ? data.floor_level : [data.floor_level];
+                    for (var f = 0; f < fls.length; f++) {
+                        html += '<span class="detail-badge-pill">🏢 ' + escapeHtml(fls[f]) + ' Floor</span>';
+                    }
+                }
+                html += '</div></div>';
+            }
+
+            // 2. Utilities & Amenities Card
+            if (data.utilities && data.utilities.length > 0) {
+                var utilIcons = {
+                    'Air-Conditioning': '❄️',
+                    'Washing Machine': '🧺',
+                    'Wifi / Internet Access': '📶',
+                    'Cooking Allowed': '🍳',
+                    'TV': '📺',
+                    'Share Bathroom': '🚻',
+                    'Private Bathroom': '🚿',
+                    'Shower': '🚿'
+                };
+                html += '<div class="detail-view-card">' +
+                    '<div class="detail-view-card-title">⚡ Utilities & Amenities</div>' +
+                    '<div class="detail-badges-grid">';
+                var utilsList = Array.isArray(data.utilities) ? data.utilities : [data.utilities];
+                for (var i = 0; i < utilsList.length; i++) {
+                    var uName = utilsList[i];
+                    var icon = utilIcons[uName] || '✓';
+                    html += '<span class="detail-badge-pill pill-success">' + icon + ' ' + escapeHtml(uName) + '</span>';
+                }
+                html += '</div></div>';
+            }
+
+            // 3. Rental Preferences Card
+            var hasGeneralPref = data.preferences && data.preferences.general && data.preferences.general.length > 0;
+            if (hasGeneralPref) {
+                var prefIcons = {
+                    'Preferred Listing': '⭐',
+                    'Prefer Zero Deposit': '💰',
+                    'Prefer move-in immediately': '🚀',
+                    'Prefer pet allowed': '🐾',
+                    'Prefer muslim friendly': '🕌',
+                    'Prefer smoking allowed': '🚬'
+                };
+                html += '<div class="detail-view-card">' +
+                    '<div class="detail-view-card-title">📋 Rental Preferences</div>' +
+                    '<div class="detail-badges-grid">';
+                var genList = Array.isArray(data.preferences.general) ? data.preferences.general : [data.preferences.general];
+                for (var j = 0; j < genList.length; j++) {
+                    var pName = genList[j];
+                    var pIcon = prefIcons[pName] || '✓';
+                    html += '<span class="detail-badge-pill pill-purple">' + pIcon + ' ' + escapeHtml(pName) + '</span>';
+                }
+                html += '</div></div>';
+            }
+
+            // 4. Preferred Tenant Criteria Card (Race & Occupation)
+            var hasRace = data.preferences && data.preferences.race && data.preferences.race.length > 0;
+            var hasOcc = data.preferences && data.preferences.occupation && data.preferences.occupation.length > 0;
+            if (hasRace || hasOcc) {
+                html += '<div class="detail-view-card">' +
+                    '<div class="detail-view-card-title">👥 Preferred Tenant Criteria</div>' +
+                    '<div class="detail-badges-grid">';
+                if (hasRace) {
+                    var raceList = Array.isArray(data.preferences.race) ? data.preferences.race : [data.preferences.race];
+                    for (var r = 0; r < raceList.length; r++) {
+                        html += '<span class="detail-badge-pill">👤 Race: ' + escapeHtml(raceList[r]) + '</span>';
+                    }
+                }
+                if (hasOcc) {
+                    var occList = Array.isArray(data.preferences.occupation) ? data.preferences.occupation : [data.preferences.occupation];
+                    for (var o = 0; o < occList.length; o++) {
+                        html += '<span class="detail-badge-pill">💼 Occupation: ' + escapeHtml(occList[o]) + '</span>';
+                    }
+                }
+                html += '</div></div>';
+            }
+
+            if (!html) {
+                html = '<div class="detail-view-card" style="background:#f8fafc; border:1px dashed #cbd5e1; text-align:center; padding:16px 14px;">' +
+                    '<div style="font-size:22px; margin-bottom:4px;">🛏️</div>' +
+                    '<div style="font-weight:700; color:#334155; font-size:13.5px;">Standard Room Rental</div>' +
+                    '<div style="font-size:12px; color:#64748b; margin-top:2px;">Contact landlord directly via phone or WhatsApp for specific room amenities & details.</div>' +
+                    '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
         function openPropertyPanel(mode, index) {
             panelMode = mode;
             if (mode !== 'create' && pendingMarker) {
@@ -1132,24 +1677,25 @@
             var actionsEdit = document.getElementById('panel-actions-edit');
             var actionsView = document.getElementById('panel-actions-view');
             var landlordInfo = document.getElementById('panel-landlord-info');
-            var imageGroup = document.getElementById('panel-image-group');
-
-            imageGroup.style.display = 'flex';
+            var panelViewSection = document.getElementById('panel-view-section');
+            var panelEditSection = document.getElementById('panel-edit-section');
+            var showcaseTitle = document.getElementById('showcase-title');
+            var showcaseBadge = document.getElementById('showcase-badge');
+            var showcasePrice = document.getElementById('showcase-price');
+            var showcaseDesc = document.getElementById('showcase-desc');
 
             if (mode === 'create') {
                 title.innerText = 'Add Property Listing';
                 saveBtn.innerText = 'Add Property';
                 if (deleteBtn) deleteBtn.style.display = 'none';
+                if (panelViewSection) panelViewSection.style.display = 'none';
+                if (panelEditSection) panelEditSection.style.display = 'flex';
                 nameInput.value = '';
-                nameInput.disabled = false;
                 descInput.value = '';
-                descInput.disabled = false;
                 priceInput.value = '';
-                priceInput.disabled = false;
                 phoneInput.value = (currentUser && currentUser.phone) ? currentUser.phone : '';
-                phoneInput.disabled = false;
                 landlordInfo.innerHTML = '';
-                landlordInfo.style.display = 'none';
+                resetPropertyDetailsForm();
                 actionsEdit.style.display = 'flex';
                 actionsView.style.display = 'none';
                 pendingImages = [];
@@ -1164,16 +1710,14 @@
                 title.innerText = 'Edit Property';
                 saveBtn.innerText = 'Save Changes';
                 if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+                if (panelViewSection) panelViewSection.style.display = 'none';
+                if (panelEditSection) panelEditSection.style.display = 'flex';
                 nameInput.value = data.name || '';
-                nameInput.disabled = false;
                 descInput.value = data.desc || '';
-                descInput.disabled = false;
                 priceInput.value = data.price || '';
-                priceInput.disabled = false;
                 phoneInput.value = data.phone || '';
-                phoneInput.disabled = false;
                 landlordInfo.innerHTML = '';
-                landlordInfo.style.display = 'none';
+                populatePropertyDetailsForm(data.details);
                 actionsEdit.style.display = 'flex';
                 actionsView.style.display = 'none';
                 var urls = parseImageUrls(data.image);
@@ -1185,23 +1729,35 @@
                 editingMarkerIndex = index;
                 if (deleteBtn) deleteBtn.style.display = 'none';
                 var data = landlordMarkers[index];
-                title.innerText = data.name || 'Property Details';
-                nameInput.value = data.name || '';
-                nameInput.disabled = true;
-                descInput.value = data.desc || '';
-                descInput.disabled = true;
-                priceInput.value = data.price || '';
-                priceInput.disabled = true;
-                phoneInput.value = data.phone || '';
-                phoneInput.disabled = true;
+                title.innerText = data.name || 'Room Details';
+                if (panelEditSection) panelEditSection.style.display = 'none';
+                if (panelViewSection) panelViewSection.style.display = 'flex';
+
+                if (showcaseTitle) showcaseTitle.innerText = data.name || 'Property Details';
+                if (showcasePrice) showcasePrice.innerText = 'RM ' + (data.price || '0');
+                if (showcaseDesc) showcaseDesc.innerText = data.desc || 'No description provided by landlord.';
+
+                if (showcaseBadge) {
+                    if (data.is_verified === 1) {
+                        showcaseBadge.innerHTML = '<span class="detail-badge-pill pill-success" style="font-size:11px;padding:2px 8px;">✓ Verified Listing</span>';
+                    } else {
+                        showcaseBadge.innerHTML = '<span class="detail-badge-pill" style="font-size:11px;padding:2px 8px;background:#fef3c7;color:#d97706;border-color:#fde68a;">⏳ Pending Verification</span>';
+                    }
+                }
+
+                // Render Room Specifications & Features (Edited by Landlord)
+                renderPropertyDetailsView(data.details);
+
                 var infoHtml = '<div class="landlord-view-card">';
                 if (data.is_verified === 1) {
                     infoHtml += '<div class="panel-verified-banner"><span class="banner-badge"><svg class="verified-seal-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill="#10B981" d="M12 1L15.39 4.39L20.18 4.39L20.18 9.18L23.57 12.57L20.18 15.96L20.18 20.75L15.39 20.75L12 24.14L8.61 20.75L3.82 20.75L3.82 15.96L0.43 12.57L3.82 9.18L3.82 4.39L8.61 4.39L12 1Z"/><path stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M8.5 12.5L11 15L16.5 9.5"/></svg> Approved Listing</span><span class="banner-sub">Published on Polisewa Map</span></div>';
                 } else if (currentUser && currentUser.id === data.user_id) {
-                    infoHtml += '<div style="background:#fffbeb;border:1px solid #fde68a;color:#b45309;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;font-weight:600;"><span style="font-size:14px;">⏳</span> <b>Pending Admin Approval</b><div style="font-weight:400;color:#92400e;margin-top:2px;">This listing is under review and not yet visible to students on the public map.</div></div>';
+                    infoHtml += '<div style="background:#fffbeb;border:1px solid #fde68a;color:#b45309;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;font-weight:600;"><span style="font-size:14px;">⏳</span> <b>Pending Admin Verification</b><div style="font-weight:400;color:#92400e;margin-top:2px;">This listing is submitted and under review by admin.</div></div>';
+                } else if (currentUser && currentUser.role === 'student') {
+                    infoHtml += '<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;font-weight:600;"><span style="font-size:14px;">🎓</span> <b>Student Rental Info</b><div style="font-weight:400;color:#1e40af;margin-top:2px;">Contact the landlord directly via WhatsApp or Call below to schedule a viewing or ask about rooms!</div></div>';
                 }
                 if (data.landlord_name) {
-                    infoHtml += '<div class="landlord-view-header"><span class="landlord-badge">🔑 Landlord</span> <span class="landlord-name">' + data.landlord_name + '</span></div>';
+                    infoHtml += '<div class="landlord-view-header"><span class="landlord-badge">🔑 Landlord</span> <span class="landlord-name">' + escapeHtml(data.landlord_name) + '</span></div>';
                 }
                 if (data.phone) {
                     infoHtml += buildContactButtonsHtml(data.phone);
@@ -1238,6 +1794,9 @@
             editingMarkerIndex = -1;
             pendingLatLng = null;
             pendingImages = [];
+            resetPropertyDetailsForm();
+            var roomViewContainer = document.getElementById('panel-room-details-view');
+            if (roomViewContainer) roomViewContainer.innerHTML = '';
             if (pendingMarker) {
                 map.removeLayer(pendingMarker);
                 pendingMarker = null;
@@ -1289,6 +1848,8 @@
 
             var savePropertyWithFinalUrls = function(finalImageUrls) {
                 var finalImageStr = JSON.stringify(finalImageUrls);
+                var detailsObj = collectPropertyDetailsFromPanel();
+                var detailsStr = JSON.stringify(detailsObj);
 
                 if (panelMode === 'create') {
                     fetch('/api/properties', {
@@ -1302,7 +1863,8 @@
                             phone: phone,
                             lat: pendingLatLng.lat,
                             lng: pendingLatLng.lng,
-                            image: finalImageStr
+                            image: finalImageStr,
+                            details: detailsStr
                         })
                     })
                     .then(function(res) {
@@ -1341,7 +1903,8 @@
                             is_verified: isVerified,
                             lat: pendingLatLng.lat,
                             lng: pendingLatLng.lng,
-                            image: finalImageStr
+                            image: finalImageStr,
+                            details: detailsStr
                         };
                         var index = landlordMarkers.length;
                         landlordMarkers.push(propertyData);
@@ -1386,6 +1949,7 @@
                     data.price = price;
                     data.phone = phone;
                     data.image = finalImageStr;
+                    data.details = detailsStr;
 
                     fetch('/api/properties/' + data.id, {
                         method: 'PUT',
@@ -1396,7 +1960,8 @@
                             desc: desc,
                             price: price,
                             phone: phone,
-                            image: finalImageStr
+                            image: finalImageStr,
+                            details: detailsStr
                         })
                     })
                     .then(function(res) {
@@ -1596,14 +2161,22 @@
                 var desc = (prop.desc || '').toLowerCase();
                 var landlord = (prop.landlord_name || '').toLowerCase();
                 var price = (prop.price ? String(prop.price) : '').toLowerCase();
+                var detailsStr = '';
+                if (prop.details) {
+                    if (typeof prop.details === 'string') {
+                        detailsStr = prop.details.toLowerCase();
+                    } else {
+                        try { detailsStr = JSON.stringify(prop.details).toLowerCase(); } catch(e) {}
+                    }
+                }
 
-                if (name.includes(qLower) || desc.includes(qLower) || landlord.includes(qLower) || price.includes(qLower)) {
+                if (name.includes(qLower) || desc.includes(qLower) || landlord.includes(qLower) || price.includes(qLower) || detailsStr.includes(qLower)) {
                     return true;
                 }
-                // Check if every individual word appears in either name, desc, or landlord
+                // Check if every individual word appears in either name, desc, landlord, or details
                 if (qWords.length > 1) {
                     var allWords = qWords.every(function(w) {
-                        return name.includes(w) || desc.includes(w) || landlord.includes(w);
+                        return name.includes(w) || desc.includes(w) || landlord.includes(w) || detailsStr.includes(w);
                     });
                     if (allWords) return true;
                 }
@@ -1674,6 +2247,25 @@
                     var descSnippet = prop.desc ? escapeHtml(prop.desc) : 'No description';
                     var landlordTag = prop.landlord_name ? ' • 🔑 ' + escapeHtml(prop.landlord_name) : '';
 
+                    var dObj = parsePropertyDetails(prop.details);
+                    var chipsHtml = '';
+                    if (dObj) {
+                        var chips = [];
+                        if (dObj.room_type) chips.push('🛏️ ' + escapeHtml(dObj.room_type));
+                        if (dObj.bathroom_type) chips.push('🚿 ' + escapeHtml(dObj.bathroom_type));
+                        if (dObj.utilities && Array.isArray(dObj.utilities) && dObj.utilities.length > 0) {
+                            for (var cu = 0; cu < Math.min(dObj.utilities.length, 2); cu++) {
+                                var cuName = dObj.utilities[cu].replace(' / Internet Access', '').replace('Air-Conditioning', 'Air-Con');
+                                chips.push('✓ ' + escapeHtml(cuName));
+                            }
+                        }
+                        if (chips.length > 0) {
+                            chipsHtml = '<div class="result-features-preview">' +
+                                chips.map(function(c) { return '<span class="result-feature-chip">' + c + '</span>'; }).join('') +
+                                '</div>';
+                        }
+                    }
+
                     div.innerHTML = '<div class="result-icon">🏠</div>' +
                         '<div class="result-text">' +
                             '<div class="result-title">' +
@@ -1684,6 +2276,7 @@
                                 priceTag +
                             '</div>' +
                             '<div class="result-sub">' + descSnippet + landlordTag + '</div>' +
+                            chipsHtml +
                         '</div>';
 
                     div.onclick = function() {
@@ -1697,6 +2290,10 @@
                         setTimeout(function() {
                             if (prop.marker) {
                                 prop.marker.openPopup();
+                            }
+                            var propIdx = landlordMarkers.indexOf(prop);
+                            if (propIdx !== -1) {
+                                openPropertyPanel('view', propIdx);
                             }
                         }, 450);
                     };
@@ -2430,6 +3027,18 @@
                 var thumb = imgUrls[0] || 'https://placehold.co/80x60?text=No+Photo';
                 var isVer = p.is_verified === 1;
 
+                var dObj = parsePropertyDetails(p.details);
+                var specSnippet = '';
+                if (dObj) {
+                    var parts = [];
+                    if (dObj.room_type) parts.push('🛏️ ' + dObj.room_type);
+                    if (dObj.bathroom_type) parts.push('🚿 ' + dObj.bathroom_type);
+                    if (dObj.floor_level && Array.isArray(dObj.floor_level) && dObj.floor_level.length > 0) parts.push('🏢 ' + dObj.floor_level[0] + ' Flr');
+                    if (parts.length > 0) {
+                        specSnippet = '<div style="font-size:11px;color:#2563eb;font-weight:600;margin-top:3px;">' + escapeHtml(parts.join(' • ')) + '</div>';
+                    }
+                }
+
                 html += '<tr>' +
                     '<td>' +
                         '<div class="admin-prop-cell">' +
@@ -2437,6 +3046,7 @@
                             '<div>' +
                                 '<div class="admin-prop-name">' + escapeHtml(p.name || 'Unnamed Property') + '</div>' +
                                 '<div class="admin-prop-desc">' + escapeHtml(p.desc ? (p.desc.substring(0, 45) + '...') : '') + '</div>' +
+                                specSnippet +
                             '</div>' +
                         '</div>' +
                     '</td>' +
