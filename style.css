@@ -3038,13 +3038,15 @@ textarea {
 /* Student Room Details Showcase View in Slide-over Panel */
 .panel-view-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: column !important;
+    width: 100%;
     gap: 16px;
 }
 
 .panel-edit-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: column !important;
+    width: 100%;
     gap: 16px;
 }
 

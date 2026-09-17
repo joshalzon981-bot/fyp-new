@@ -28,7 +28,7 @@
     <script src="boundary.js"></script>
 
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=20260828_1" />
+    <link rel="stylesheet" href="style.css?v=20260917_3" />
 </head>
 
 <body>
@@ -410,7 +410,7 @@
 
         <form id="property-panel-form" onsubmit="savePropertyFromPanel(event)">
             <!-- Student/Viewer Mode Room Showcase Section -->
-            <div id="panel-view-section" class="panel-view-section" style="display:none;">
+            <div id="panel-view-section" class="panel-view-section" style="display:none; flex-direction:column; width:100%; gap:16px;">
                 <!-- User/Student Photo Gallery Viewer (View mode) -->
                 <div id="panel-image-view-container" style="width: 100%;">
                     <div id="panel-gallery-view"></div>
@@ -440,7 +440,7 @@
             </div>
 
             <!-- Landlord Create / Edit Mode Form Section -->
-            <div id="panel-edit-section" class="panel-edit-section">
+            <div id="panel-edit-section" class="panel-edit-section" style="display:flex; flex-direction:column; width:100%; gap:16px;">
                 <div class="input-group">
                     <label for="panel-name">Property / Room Name <span class="required-star">*</span></label>
                     <input type="text" id="panel-name" placeholder="Cozy Room near PKS" />
@@ -1702,7 +1702,10 @@
                 saveBtn.innerText = 'Add Property';
                 if (deleteBtn) deleteBtn.style.display = 'none';
                 if (panelViewSection) panelViewSection.style.display = 'none';
-                if (panelEditSection) panelEditSection.style.display = 'flex';
+                if (panelEditSection) {
+                    panelEditSection.style.display = 'flex';
+                    panelEditSection.style.flexDirection = 'column';
+                }
                 nameInput.value = '';
                 descInput.value = '';
                 priceInput.value = '';
@@ -1724,7 +1727,10 @@
                 saveBtn.innerText = 'Save Changes';
                 if (deleteBtn) deleteBtn.style.display = 'inline-flex';
                 if (panelViewSection) panelViewSection.style.display = 'none';
-                if (panelEditSection) panelEditSection.style.display = 'flex';
+                if (panelEditSection) {
+                    panelEditSection.style.display = 'flex';
+                    panelEditSection.style.flexDirection = 'column';
+                }
                 nameInput.value = data.name || '';
                 descInput.value = data.desc || '';
                 priceInput.value = data.price || '';
@@ -1744,7 +1750,10 @@
                 var data = landlordMarkers[index];
                 title.innerText = data.name || 'Room Details';
                 if (panelEditSection) panelEditSection.style.display = 'none';
-                if (panelViewSection) panelViewSection.style.display = 'flex';
+                if (panelViewSection) {
+                    panelViewSection.style.display = 'flex';
+                    panelViewSection.style.flexDirection = 'column';
+                }
 
                 if (showcaseTitle) showcaseTitle.innerText = data.name || 'Property Details';
                 if (showcasePrice) showcasePrice.innerText = 'RM ' + (data.price || '0');
